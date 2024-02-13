@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 const LatLng currentLocation = LatLng(18.57751, 74.00377);
 
@@ -17,6 +18,24 @@ class _LiveMapsViewState extends State<LiveMapsView> {
   late GoogleMapController mapController;
 
   final Map<String, Marker> _markers = {};
+
+  int _selectedIndex = 0;
+  static Map<int, int> miles = const {
+    0: 42,
+    1: 43,
+    2: 44,
+    3: 45,
+  };
+
+  static Map<int, int> speed = const {
+    0: 140,
+    1: 150,
+    2: 160,
+    3: 170,
+    4: 180,
+    5: 190,
+    6: 200,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +155,9 @@ class _LiveMapsViewState extends State<LiveMapsView> {
                     InkWell(
                       onTap: () {
                         setState(() {
-                          isContainer1Tapped = false; // Reset other container
+                          isContainer1Tapped = false;
+                          // Reset other container
+                          _showBottomPopup(context);
                         });
                       },
                       child: Container(
@@ -172,26 +193,38 @@ class _LiveMapsViewState extends State<LiveMapsView> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.black),
-            backgroundColor: Colors.white,
-            label: 'Home',
+          items: [
+            BottomNavigationBarItem(
+              icon: Image.asset(
+                'assets/images/iclunch.png',
+                height: 30,
+              ),
+              backgroundColor: Colors.white,
+              label: '',
+            ),
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/icbuilding.png', height: 25),
+                backgroundColor: Colors.white,
+                label: ''),
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/icpetrolpump.png', height: 30),
+                backgroundColor: Colors.white,
+                label: ''),
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/iclocation.png', height: 30),
+                backgroundColor: Colors.white,
+                label: '')
+          ],
+          selectedIconTheme: const IconThemeData(
+            color: Color.fromARGB(255, 25, 45, 159),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.black),
-              backgroundColor: Colors.white,
-              label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.black),
-              backgroundColor: Colors.white,
-              label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.black),
-              backgroundColor: Colors.white,
-              label: 'Home')
-        ],
-      ),
+          unselectedItemColor: Colors.black,
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }),
     );
   }
 
@@ -201,3 +234,102 @@ class _LiveMapsViewState extends State<LiveMapsView> {
     _markers[id] = marker;
   }
 }
+
+void _showBottomPopup(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+          height: 500, // Adjust the height as needed
+          child:const Text('data'));
+    },
+  );
+}
+
+//  LineChartData mainData() {
+    return const LineChartData(
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: true,
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: const Color.fromARGB(100, 100, 100, 100),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingVerticalLine: (value) {
+          return FlLine(
+            color: const Color.fromARGB(100, 100, 100, 100),
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: FlTitlesData(
+        show: true,
+        bottomTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 22,
+          getTextStyles: (_, value) => const TextStyle(
+              color: Color(0xff68737d),
+              fontWeight: FontWeight.bold,
+              fontSize: 16),
+          getTitles: (value) {
+            String? month = monthMap[value.toInt()];
+            if (month == null) {
+              return '';
+            }
+            return month;
+          },
+          margin: 8,
+        ),
+        leftTitles: SideTitles(
+          showTitles: true,
+          getTextStyles: (_, value) => const TextStyle(
+            color: Color(0xff67727d),
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+          getTitles: (value) {
+            String? money = moneyMap[value.toInt()];
+            if (money == null) {
+              return '';
+            }
+            return money;
+          },
+          reservedSize: 28,
+          margin: 12,
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: const Color(0xff37434d), width: 1),
+      ),
+      minX: 0,
+      maxX: 11,
+      minY: 0,
+      maxY: 6,
+      lineBarsData: [
+        LineChartBarData(
+          spots:const [
+            FlSpot(0, 3),
+            FlSpot(2.6, 2),
+            FlSpot(4.9, 5),
+            FlSpot(6.8, 3.1),
+            FlSpot(8, 4),
+            FlSpot(9.5, 3),
+            FlSpot(11, 4),
+          ],
+          isCurved: true,
+          barWidth: 5,
+          isStrokeCapRound: true,
+          dotData:const FlDotData(
+            show: false,
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            
+          ),
+        ),
+      ],
+    );
+  }
