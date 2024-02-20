@@ -1,8 +1,64 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:dio/dio.dart' hide Response;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:solis_flutterproject/Views/pages/Account/registerpage.dart';
 import 'package:solis_flutterproject/Views/pages/dashboardpage.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  void login(String email, password) async {
+    try {
+      Response response = await post(
+          Uri.parse('http://139.59.62.79/api/v1/accounts/login/fotax/web'),
+          body: {'mobile': email, 'password': password});
+      if (response.statusCode == 200) {
+        // ignore: use_build_context_synchronously
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const DashboardPage()));
+
+        // ignore: use_build_context_synchronously
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.scale,
+          btnOkColor:const Color.fromARGB(255, 25, 45, 159),
+          title: 'Success',
+          desc: 'Welcome, Lokesh',
+          descTextStyle: const TextStyle(fontSize: 18),
+          btnOkOnPress: () {},
+        ).show();
+      } else {
+        // ignore: use_build_context_synchronously
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.scale,
+          title: 'Alert',
+          desc: 'Invalid username and password',
+           btnOkColor:const Color.fromARGB(255, 25, 45, 159),
+          descTextStyle: const TextStyle(fontSize: 18),
+          btnOkOnPress: () {},
+        ).show();
+        // ignore: avoid_print
+        print('Invalid user name and password');
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +132,9 @@ class LoginPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               TextFormField(
-                                  autofocus: true,
+                                textInputAction: TextInputAction.next,
+                                  controller: emailController,
+                                  autofocus: false,
                                   decoration: const InputDecoration(
                                       labelStyle: TextStyle(
                                           fontSize: 20,
@@ -96,6 +154,8 @@ class LoginPage extends StatelessWidget {
                                 height: 20,
                               ),
                               TextFormField(
+                                textInputAction: TextInputAction.done,
+                                  controller: passwordController,
                                   obscureText: true,
                                   decoration: const InputDecoration(
                                       suffixIcon: Icon(
@@ -125,11 +185,13 @@ class LoginPage extends StatelessWidget {
                               // Sign In Button
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const DashboardPage()));
+                                  login(emailController.text.toString(),
+                                      passwordController.text.toString());
+                                  // Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (context) =>
+                                  //             const DashboardPage()));
                                 },
                                 style: ButtonStyle(
                                     backgroundColor:
@@ -148,21 +210,30 @@ class LoginPage extends StatelessWidget {
                                       color: Colors.white, fontSize: 20),
                                 ),
                               ),
-                              const Padding(
+                               Padding(
                                 padding:
-                                    EdgeInsets.only(left: 20.0, right: 15.0),
+                                  const  EdgeInsets.only(left: 20.0, right: 15.0),
                                 child: Row(
                                   children: [
-                                    Text(
-                                      "Register",
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 18),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const RegisterPage()));
+                                      },
+                                      child:const Text(
+                                        "Register",
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 18),
+                                      ),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 95,
                                     ),
-                                    Text(
+                                   const Text(
                                       "Forgot Password",
                                       textAlign: TextAlign.end,
                                       style: TextStyle(

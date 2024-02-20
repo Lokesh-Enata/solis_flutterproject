@@ -1,11 +1,14 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:solis_flutterproject/Views/pages/livemapspage.dart';
+import 'package:solis_flutterproject/Views/pages/Account/loginpage.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       // Appbar code
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 25, 45, 159),
@@ -91,7 +94,7 @@ class DashboardPage extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LiveMapsView()));
+                              builder: (context) => const LiveMapsView()));
                     },
                     child: Container(
                       height: 80,
@@ -220,25 +223,45 @@ class DashboardPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    height: 80,
-                    width: 180,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/iclogout.png',
-                          height: 40,
-                        ),
-                        const Text(
-                          'Logout',
-                          style: TextStyle(color: Colors.black, fontSize: 18),
-                        )
-                      ],
+                  InkWell(
+                    onTap: () {
+                      AwesomeDialog(
+                        context: context,
+                        dialogType: DialogType.warning,
+                        barrierColor: Colors.grey,
+                        animType: AnimType.scale,
+                        title: 'Alert',
+                        desc: 'Are you sure you want to Logout ?',
+                        descTextStyle: const TextStyle(fontSize: 18),
+                        btnOkOnPress: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginPage()));
+                        },
+                        btnCancelOnPress: (){}
+                      ).show();
+                    },
+                    child: Container(
+                      height: 80,
+                      width: 180,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/iclogout.png',
+                            height: 40,
+                          ),
+                          const Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.black, fontSize: 18),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ],

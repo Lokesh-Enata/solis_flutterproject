@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:solis_flutterproject/Views/pages/Account/otppage.dart';
+import 'package:solis_flutterproject/Views/pages/Account/registerpage.dart';
 import 'package:solis_flutterproject/Views/pages/dashboardpage.dart';
-import 'package:solis_flutterproject/Views/pages/livemapspage.dart';
-import 'package:solis_flutterproject/Views/pages/loginpage.dart';
+import 'package:solis_flutterproject/Views/pages/Account/loginpage.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -16,6 +17,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const DashboardPage();
+    return const OTPPage();
   }
 }

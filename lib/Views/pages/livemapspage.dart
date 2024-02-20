@@ -1,8 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:solis_flutterproject/Views/models/tripmodel.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 const LatLng currentLocation = LatLng(18.57751, 74.00377);
+// Your list of data
+List _myData = [
+  TripData(
+      iconsimage: 'assets/images/icdistance.png',
+      headertext: 'Distance',
+      subheadertext: '8',
+      unittext: ' km'),
+  TripData(
+      iconsimage: 'assets/images/icrightplay.png',
+      headertext: 'Trip Time',
+      subheadertext: '130',
+      unittext: ' sec'),
+  TripData(
+      iconsimage: 'assets/images/icavgspeed.png',
+      headertext: 'Avg Speed',
+      subheadertext: '60',
+      unittext: ' kmph'),
+  TripData(
+      iconsimage: 'assets/images/icleftplay.png',
+      headertext: 'Idle Time',
+      subheadertext: '70',
+      unittext: ' sec')
+];
 
 class LiveMapsView extends StatefulWidget {
   const LiveMapsView({super.key});
@@ -15,31 +39,35 @@ class _LiveMapsViewState extends State<LiveMapsView> {
   bool isContainer1Tapped = false;
   // bool isContainer2Tapped = false;
 
-  late GoogleMapController mapController;
+  // late GoogleMapController mapController;
 
-  final Map<String, Marker> _markers = {};
+  // final Map<String, Marker> _markers = {};
 
   int _selectedIndex = 0;
-  static Map<int, int> miles = const {
-    0: 42,
-    1: 43,
-    2: 44,
-    3: 45,
-  };
+  late GoogleMapController _controller;
+  LatLng _currentLocation = const LatLng(18.577456557847658, 74.00349281054935);
 
-  static Map<int, int> speed = const {
-    0: 140,
-    1: 150,
-    2: 160,
-    3: 170,
-    4: 180,
-    5: 190,
-    6: 200,
-  };
+  @override
+  void initState() {
+    super.initState();
+    _initSocketConnection();
+  }
+
+  void _initSocketConnection() {
+    final socket = io.io('http://64.227.137.118:3031');
+
+    socket.on('location', (data) {
+      setState(() {
+        _currentLocation = LatLng(data[18.577456557847658], data[74.00349281054935]);
+        print(data);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 25, 45, 159),
         toolbarHeight: 80,
@@ -96,19 +124,28 @@ class _LiveMapsViewState extends State<LiveMapsView> {
               ),
             ),
           ),
+
+          // GoogleMap Integration Code
           Expanded(
             child: Stack(children: [
               GoogleMap(
+                mapType: MapType.normal,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
                 trafficEnabled: true,
                 initialCameraPosition:
-                    const CameraPosition(target: currentLocation, zoom: 14),
+                     CameraPosition(target: _currentLocation, zoom: 14),
                 onMapCreated: (controller) {
-                  mapController = controller;
-                  addMarker('test', currentLocation);
+                  setState(() {
+                    _controller = controller;
+                  });
                 },
-                markers: _markers.values.toSet(),
+                markers: {
+           Marker(
+            markerId:const MarkerId('currentLocation'),
+            position: _currentLocation,
+            infoWindow:const InfoWindow(title: 'Current Location'),
+          ),}
               ),
               Positioned(
                 top: 30,
@@ -228,108 +265,191 @@ class _LiveMapsViewState extends State<LiveMapsView> {
     );
   }
 
-  addMarker(String id, LatLng location) {
-    var marker = Marker(markerId: MarkerId(id), position: location);
+//   addMarker(String id, LatLng location) {
+//     var marker = Marker(markerId: MarkerId(id), position: location);
 
-    _markers[id] = marker;
-  }
-}
+//     _markers[id] = marker;
+//   }
+// }
 
 void _showBottomPopup(BuildContext context) {
   showModalBottomSheet(
     context: context,
+    backgroundColor: Colors.black,
     builder: (BuildContext context) {
-      return Container(
-          height: 500, // Adjust the height as needed
-          child:const Text('data'));
+      return SizedBox(
+          height: 350, // Adjust the height as needed
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 30, bottom: 10, right: 30, top: 20),
+                    child: Wrap(spacing: -30, children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Trip Details',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.topStart,
+                                child: IconButton(
+                                  icon: Image.asset(
+                                      'assets/images/icoutlinearrow.png',
+                                      height: 30),
+                                  onPressed: () {},
+                                ),
+                              )
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Konark Plaza to Camp',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              Wrap(
+                                spacing: -15,
+                                children: [
+                                  IconButton(
+                                    icon: Image.asset(
+                                        'assets/images/icrightplay.png',
+                                        height: 25),
+                                    onPressed: () {},
+                                  ),
+                                  IconButton(
+                                    icon: Image.asset(
+                                        'assets/images/icleftplay.png',
+                                        height: 25),
+                                    onPressed: () {},
+                                  ),
+                                  IconButton(
+                                    icon: Image.asset(
+                                        'assets/images/icplaypause.png',
+                                        height: 28),
+                                    onPressed: () {},
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+              Container(
+                  alignment: AlignmentDirectional.bottomEnd,
+                  height: 230,
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30.0),
+                        topRight: Radius.circular(30.0),
+                      )),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                      child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 1.9,
+                                  mainAxisSpacing: 0,
+                                  crossAxisSpacing: 10),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _myData.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              margin: const EdgeInsets.only(top: 25),
+                              width: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey),
+                                color: Colors.white,
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.fromLTRB(0, 0, 30, 0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Image.asset(
+                                        _myData[index].iconsimage,
+                                        height: 25,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    Center(
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              _myData[index].headertext,
+                                              style: const TextStyle(
+                                                  color: Colors.black87,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  _myData[index].subheadertext,
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 25,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _myData[index].unittext,
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                    ),
+                  ))
+            ],
+          ));
     },
   );
 }
-
-//  LineChartData mainData() {
-    return const LineChartData(
-      gridData: FlGridData(
-        show: true,
-        drawVerticalLine: true,
-        getDrawingHorizontalLine: (value) {
-          return FlLine(
-            color: const Color.fromARGB(100, 100, 100, 100),
-            strokeWidth: 1,
-          );
-        },
-        getDrawingVerticalLine: (value) {
-          return FlLine(
-            color: const Color.fromARGB(100, 100, 100, 100),
-            strokeWidth: 1,
-          );
-        },
-      ),
-      titlesData: FlTitlesData(
-        show: true,
-        bottomTitles: SideTitles(
-          showTitles: true,
-          reservedSize: 22,
-          getTextStyles: (_, value) => const TextStyle(
-              color: Color(0xff68737d),
-              fontWeight: FontWeight.bold,
-              fontSize: 16),
-          getTitles: (value) {
-            String? month = monthMap[value.toInt()];
-            if (month == null) {
-              return '';
-            }
-            return month;
-          },
-          margin: 8,
-        ),
-        leftTitles: SideTitles(
-          showTitles: true,
-          getTextStyles: (_, value) => const TextStyle(
-            color: Color(0xff67727d),
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
-          getTitles: (value) {
-            String? money = moneyMap[value.toInt()];
-            if (money == null) {
-              return '';
-            }
-            return money;
-          },
-          reservedSize: 28,
-          margin: 12,
-        ),
-      ),
-      borderData: FlBorderData(
-        show: true,
-        border: Border.all(color: const Color(0xff37434d), width: 1),
-      ),
-      minX: 0,
-      maxX: 11,
-      minY: 0,
-      maxY: 6,
-      lineBarsData: [
-        LineChartBarData(
-          spots:const [
-            FlSpot(0, 3),
-            FlSpot(2.6, 2),
-            FlSpot(4.9, 5),
-            FlSpot(6.8, 3.1),
-            FlSpot(8, 4),
-            FlSpot(9.5, 3),
-            FlSpot(11, 4),
-          ],
-          isCurved: true,
-          barWidth: 5,
-          isStrokeCapRound: true,
-          dotData:const FlDotData(
-            show: false,
-          ),
-          belowBarData: BarAreaData(
-            show: true,
-            
-          ),
-        ),
-      ],
-    );
-  }
+}
